@@ -96,23 +96,23 @@
 		          	<span class="subheading">Welcome to</span>
 		            <h2 class="mb-4">Kechara Soup Kitchen</h2>
 		          </div>
-	            <form action="#">
+	            <form action="adminlogin.php" method="POST">
 	              <div class="row">
 	                <div class="col-md-6">
 	                  <div class="form-group">
 	                    <label for="">Username</label>
-	                    <input type="text" class="form-control" placeholder="Your Username">
+	                    <input type="text" class="form-control" placeholder="Your Username" name="username">
 	                  </div>
 	                </div>
 	                <div class="col-md-6">
 	                  <div class="form-group">
 	                    <label for="">Password</label>
-	                    <input type="text" class="form-control" placeholder="Your Password">
+	                    <input type="text" class="form-control" placeholder="Your Password" name="password">
 	                  </div>
 	                </div>
 	                <div class="col-md-12 mt-3">
 	                  <div class="form-group">
-	                    <input type="submit" value="Login" class="btn btn-primary py-3 px-5">
+                      <input type="submit" name="submit" value="Login" class="btn btn-primary py-3 px-5">
 	                  </div>
 	                </div>
                   <div class="col-md-12 mt-3">
