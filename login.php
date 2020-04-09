@@ -1,3 +1,7 @@
+<?php
+	session_start();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -68,12 +72,69 @@
             <li class="nav-item"><a href="services.php" class="nav-link">Services</a></li>
             <li class="nav-item"><a href="team.php" class="nav-link">Team</a></li>
             <li class="nav-item"><a href="contact.php" class="nav-link">Contact</a></li>
-            <li class="nav-item cta"><a href="login.php" class="nav-link">Join Us!</a></li>
+            <li class="nav-item cta"><a href="login.php" class="nav-link">Login</a></li>
 	        </ul>
 	      </div>
 	    </div>
 	  </nav>
     <!-- END nav -->
+
+<?php
+	$msg = "";
+	$inputemail = "";
+?>
+
+<?php
+	//Get the username and password from the input form
+	//Check with the user data and if they are match, the user can login
+	if ($_SERVER["REQUEST_METHOD"] == "POST") {
+		$inputemail = $_POST['email'];
+		$inputpassword = md5($_POST['password']);
+		
+		$host = "localhost";
+		$dbUsername = "root";
+		$dbPassword = "";
+		$dbname = "ksk";
+		//create connection
+		$conn = new mysqli($host, $dbUsername, $dbPassword, $dbname);
+		if (mysqli_connect_error()) {
+			$msg = "Connection Error!";
+			die('Connect Error('. mysqli_connect_errno().')'. mysqli_connect_error());
+		}
+		else {
+			$SELECT = "SELECT userid, password, fullname, role FROM user WHERE email = ? && password = ? && verificationstatus = '1' Limit 1";
+			//prepare statement
+			$stmt = $conn->prepare($SELECT);
+			$stmt->bind_param("ss", $inputemail, $inputpassword);
+			$stmt->execute();
+			$stmt->store_result();
+			$rnum = $stmt->num_rows;
+			if ($rnum > 0) {
+				$stmt->bind_result($userID, $password, $fullname, $role);
+				$stmt->fetch();
+				$_SESSION["loginFullname"] = $fullname;
+				$_SESSION["loginUserID"] = $userID;
+				if ($role === "Staff") {
+					header('Location: http://localhost/ksk/menustaff.php'); 
+				}
+				else if ($role === "Donor") {
+					header('Location: http://localhost/ksk/menudonor.php'); 
+				}
+				else if ($role === "Volunteer") {
+					header('Location: http://localhost/ksk/menuvolunteer.php');
+				}
+				else {
+					header('Location: http://localhost/ksk/menufamily.php');
+				}			
+			}
+			else {
+				$msg = "Your username or password is not valid or your account has not been verified yet!";
+			}
+			$stmt->close();
+			$conn->close();
+		}
+	}
+?>
     
     <section class="hero-wrap hero-wrap-2" style="background-image: url('images/background_4.jpg');" data-stellar-background-ratio="0.5">
       <div class="overlay"></div>
@@ -96,35 +157,31 @@
 		          	<span class="subheading">Welcome to</span>
 		            <h2 class="mb-4">Kechara Soup Kitchen</h2>
 		          </div>
-	            <form action="adminlogin.php" method="POST">
+	            <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="POST" class="was-validated">
 	              <div class="row">
 	                <div class="col-md-6">
 	                  <div class="form-group">
-	                    <label for="">Username</label>
-	                    <input type="text" class="form-control" placeholder="Your Username" name="username">
+	                    <label for="">Email</label>
+	                    <input name="email" type="email" class="form-control" value="<?php echo $inputemail === "" ? "" : $inputemail ?>" required>
 	                  </div>
 	                </div>
 	                <div class="col-md-6">
 	                  <div class="form-group">
 	                    <label for="">Password</label>
-	                    <input type="text" class="form-control" placeholder="Your Password" name="password">
+	                    <input name="password" type="password" class="form-control" required>
 	                  </div>
 	                </div>
 	                <div class="col-md-12 mt-3">
 	                  <div class="form-group">
-                      <input type="submit" name="submit" value="Login" class="btn btn-primary py-3 px-5">
+					    <span class="error" style="color: red; font-family: Courier"><b><?php echo $msg === "" ? "" : "WARNING: " . $msg;?></b></span>
+					  </div>					
+                    </div>
+				    <div class="col-md-12 mt-3">
+	                  <div class="form-group">
+	                    <input type="submit" value="Login" class="btn btn-primary py-3 px-5">
+						<p><a href="register.php">Join Us!</a>&nbsp&nbsp&nbsp&nbsp&nbsp<a href="forgotpassword.php">Forgot Password</a></p>
 	                  </div>
 	                </div>
-                  <div class="col-md-12 mt-3">
-                    <div class="form-group">
-                      <p><a href="register.php">Don't have an account? Create here.</a></p>
-                    </div>
-                  </div>
-                  <div class="col-md-12 mt-3">
-                    <div class="form-group">
-                      <p><a href="#">Forgot username?</a></p>
-                    </div>
-                  </div>
 	              </div>
 	            </form>
 	          </div>

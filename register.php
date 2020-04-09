@@ -33,6 +33,7 @@
     <link rel="stylesheet" href="css/style.css">
   </head>
   <body>
+
     <div class="py-1 bg-black top">
     	<div class="container">
     		<div class="row no-gutters d-flex align-items-start align-items-center px-md-0">
@@ -68,66 +69,183 @@
             <li class="nav-item"><a href="services.php" class="nav-link">Services</a></li>
             <li class="nav-item"><a href="team.php" class="nav-link">Team</a></li>
             <li class="nav-item"><a href="contact.php" class="nav-link">Contact</a></li>
-            <li class="nav-item cta"><a href="login.php" class="nav-link">Join Us!</a></li>
+            <li class="nav-item cta"><a href="login.php" class="nav-link">Login</a></li>
 	        </ul>
 	      </div>
 	    </div>
 	  </nav>
     <!-- END nav -->
 
-  <?php
-//Get the data from the input form
-//Save into the database
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-$username = $_POST['username'];
-$password = $_POST['password'];
-$full_name = $_POST['full_name'];
-$email = $_POST['email'];
-$address = $_POST['address'];
-$phone = $_POST['phone'];
-$role_id = $_POST['role_id'];
-if (!empty($username) || !empty($password) || !empty($full_name) || !empty($email) || !empty($address) || !empty($phone) || !empty($role_id)) {
-  $host = "localhost";
-  $dbUsername = "root";
-  $dbPassword = "";
-  $dbname = "ksk";
-  //create connection
-  $conn = new mysqli($host, $dbUsername, $dbPassword, $dbname);
-  if (mysqli_connect_error()) {
-    $msg = "Connection Error!";
-    die('Connect Error('. mysqli_connect_errno().')'. mysqli_connect_error());
-  }
-  else {
-    $SELECT = "SELECT email From user Where email = ? Limit 1";
-    $INSERT = "INSERT Into user (username, password, full_name, email, address, phone, role_id) values(?, ?, ?, ?, ?, ?, ?)";
-    //prepare statement
-    $stmt = $conn->prepare($SELECT);
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $stmt->bind_result($email);
-    $stmt->store_result();
-    $rnum = $stmt->num_rows;
-    if ($rnum==0) {
-      $stmt->close();
-      $stmt = $conn->prepare($INSERT);
-      $stmt->bind_param("sssssii", $username, $password, $full_name, $email, $address, $phone, $role_id);
-      $stmt->execute();
-      $msg = "Register Successfully!";
-      header('Location: http://localhost/ksk/login.php');
-    }
-    else {
-      $msg = "Someone already register using this email!";
-    }
-    $stmt->close();
-    $conn->close();
-  }
-}
-else {
-  $msg = "Please fill all fields!";
-  die();
-}
-}
+<?php
+	$msg = "";
+	$fullname = "";
+	$email = "";
+	$role = "";
+	$address = "";
+	$phone = "";
+	$driverlicense = "";
 ?>
+
+<?php
+	// Import PHPMailer classes into the global namespace
+	// These must be at the top of your script, not inside a function
+	use PHPMailer\PHPMailer\PHPMailer;
+	use PHPMailer\PHPMailer\SMTP;
+	use PHPMailer\PHPMailer\Exception;
+
+	// Load Composer's autoloader
+	require 'vendor/autoload.php';
+
+	//Get the data from the input form
+	//Save into the database
+	if ($_SERVER["REQUEST_METHOD"] == "POST") {
+		$fullname = $_POST['fullname'];
+		$email = $_POST['email'];
+		$password = $_POST['password'];
+		$retypePassword = $_POST['retypepassword'];
+		$role = $_POST['role'];
+		$address = $_POST['address'];
+		$phone = $_POST['phone'];
+		$driverlicense = $_POST['driverlicense'];
+		
+		//echo "<script type='text/javascript'>alert('" . $password . " and " . $retypePassword . "')</script>";
+		
+		if($password != $retypePassword) {
+			$msg = "Check your password.";
+		}
+		else {
+			// Validate password strength
+			$uppercase = preg_match('@[A-Z]@', $password);
+			$lowercase = preg_match('@[a-z]@', $password);
+			$number    = preg_match('@[0-9]@', $password);
+
+			if(!$uppercase || !$lowercase || !$number || strlen($password) < 8) {
+				$msg = "Password should be at least 8 characters in length and should include at least one upper case letter, and one number.";
+			}
+			else {	
+				$password = md5($password);
+				
+				$host = "localhost";
+				$dbUsername = "root";
+				$dbPassword = "";
+				$dbname = "ksk";
+				//create connection
+				$conn = new mysqli($host, $dbUsername, $dbPassword, $dbname);
+				if (mysqli_connect_error()) {
+					$msg = "Connection Error!";
+					die('Connect Error('. mysqli_connect_errno().')'. mysqli_connect_error());
+				}
+				else {
+					$SELECT = "SELECT userid From user Where email = ? and verificationstatus = '1'";
+					//prepare statement
+					$stmt = $conn->prepare($SELECT);
+					$stmt->bind_param("s", $email);
+					$stmt->execute();
+					$stmt->bind_result($email);
+					$stmt->store_result();
+					$rnum = $stmt->num_rows;
+					if ($rnum > 0) {
+						$msg = "Your email has already been activated.";
+					} 
+					else {
+						$stmt->close();
+						//prepare statement
+						$SELECT = "SELECT userid From user Where email = ? and verificationstatus = '0'";
+						$stmt = $conn->prepare($SELECT);
+						$stmt->bind_param("s", $email);
+						$stmt->execute();
+						$stmt->bind_result($email);
+						$stmt->store_result();
+						$rnum = $stmt->num_rows;
+						if ($rnum > 0) {
+							$msg = "Your email has already been in the system but has not yet verified.";
+						} 
+						else {
+							// now, compose the content of the verification email, it will be sent to the email provided during sign up
+							// generate verification code, acts as the "key"
+							$verificationCode = md5(uniqid("yourrandomstringyouwanttoaddhere", true));
+			 
+							// send the email verification
+							$verificationLink = "http://localhost/ksk/activate.php?code=" . $verificationCode;
+			 
+							// Instantiation and passing `true` enables exceptions
+							$mail = new PHPMailer(true);
+			
+							$htmlStr = "";
+							$htmlStr .= "Hi " . $email . ",<br /><br />";
+			 
+							$htmlStr .= "Please click the button below to verify your subscription and have access to the KSK systems.<br /><br /><br />";
+							$htmlStr .= "<a href='{$verificationLink}' target='_blank' style='padding:1em; font-weight:bold; background-color:blue; color:#fff;'>VERIFY EMAIL</a><br /><br /><br />";
+			 
+							$htmlStr .= "Kind regards,<br />";
+							$htmlStr .= "KSK Admin<br />";
+			 
+			 
+							$name = "KSK";
+							$email_sender = "claramayuagusta@gmail.com";
+							$subject = "Verification Link | KSK | Subscription";
+			 
+							$headers  = "MIME-Version: 1.0\r\n";
+							$headers .= "Content-type: text/html; charset=iso-8859-1\r\n";
+							$headers .= "From: {$name} <{$email_sender}> \n";
+			 
+							$body = $htmlStr;
+			 
+							// send email using the mail function, you can also use php mailer library if you want
+							
+							try {
+								//Server settings
+								//$mail->SMTPDebug  = SMTP::DEBUG_SERVER;                     // Enable verbose debug output
+								$mail->isSMTP();                                            // Send using SMTP
+								$mail->CharSet 	  = "utf-8";								// set charset to utf8
+								$mail->Host       = 'smtp.gmail.com';                    	// Set the SMTP server to send through
+								$mail->SMTPAuth   = true;                                   // Enable SMTP authentication
+								$mail->Username   = $email_sender;                     		// SMTP username
+								$mail->Password   = 'Apinkbm13';                             // SMTP password
+								$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;         // Enable TLS encryption; `PHPMailer::ENCRYPTION_SMTPS` also accepted
+								$mail->Port       = 587;                                    // TCP port to connect to
+								$mail->SMTPOptions = array(
+									'ssl' => array(
+										'verify_peer' => false,
+										'verify_peer_name' => false,
+										'allow_self_signed' => true
+									)
+								);
+
+								//Recipients
+								$mail->setFrom($email_sender, $name);
+								$mail->addAddress($email, $fullname);     	// Add a recipient
+								$mail->addReplyTo($email_sender, $name);
+
+								// Content
+								$mail->isHTML(true);                                  		// Set email format to HTML
+								$mail->Subject = $subject;
+								$mail->Body    = $body;
+								
+								header("refresh:2; url=http://localhost/ksk/login.php"); 
+								
+								$stmt->close();
+								$INSERT = "INSERT INTO user (role, fullname, email, password, address, phone, driverlicense, verificationcode, verificationstatus, activeflag) VALUES ('$role', '$fullname', '$email', '$password', '$address', '$phone', '$driverlicense', '$verificationCode', '0', '0')";
+								$stmt = $conn->prepare($INSERT);
+								$stmt->execute();
+								
+								$mail->send();
+								
+								echo "<script type='text/javascript'>alert('A verification email were sent to " . $email . ", please open your email inbox and click the given link so you can login.')</script>";
+								
+							} catch (Exception $e) {
+								$msg = "Verification email sending failed.";
+								die();
+							}
+						}
+					}
+					$stmt->close();
+					$conn->close();
+				}
+			}
+		}
+	}
+?>	
     
     <section class="hero-wrap hero-wrap-2" style="background-image: url('images/background_4.jpg');" data-stellar-background-ratio="0.5">
       <div class="overlay"></div>
@@ -150,67 +268,79 @@ else {
 		          	<span class="subheading">Welcome to</span>
 		            <h2 class="mb-4">Kechara Soup Kitchen</h2>
 		          </div>
-	            <form action="#">
+	            <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="POST" class="was-validated">
 	              <div class="row">
                   <div class="col-md-12 mt-3">
                     <div class="form-group">
                       <label for="">Role</label>
                       <div class="select-wrap one-third">
                         <div class="icon"><span class="ion-ios-arrow-down"></span></div>
-                        <select name="" id="" class="form-control">
-                          <option value="">Role</option>
-                          <option value="">Donor</option>
-                          <option value="">Volunteer</option>
-                        </select>
+                          <select name="role" id="role" class="form-control" onchange='CheckRole(this.value);' required>
+                            <option <?php echo $role === "Donor" ? "selected" : "" ?> value="Donor">Donor</option>
+                            <option <?php echo $role === "Volunteer" ? "selected" : "" ?> value="Volunteer">Volunteer</option>
+                          </select>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-	                <div class="col-md-6">
-	                  <div class="form-group">
-	                    <label for="">Username</label>
-	                    <input type="text" class="form-control" placeholder="Your Username">
-	                  </div>
-	                </div>
-	                <div class="col-md-6">
-	                  <div class="form-group">
-	                    <label for="">Password</label>
-	                    <input type="text" class="form-control" placeholder="Your Password">
-	                  </div>
-	                </div>
+					</div>
 	                <div class="col-md-6">
 	                  <div class="form-group">
 	                    <label for="">Full Name</label>
-	                    <input type="text" class="form-control" placeholder="Your Full Name">
+	                    <input name="fullname" type="text" class="form-control" value="<?php echo $fullname === "" ? "" : $fullname ?>" required>
 	                  </div>
 	                </div>
 	                <div class="col-md-6">
 	                  <div class="form-group">
 	                    <label for="">Email</label>
-	                    <input type="text" class="form-control" placeholder="Your Email">
+	                    <input name="email" type="email" class="form-control" value="<?php echo $email === "" ? "" : $email ?>" required>
+	                  </div>
+	                </div>
+	                <div class="col-md-6">
+	                  <div class="form-group">
+	                    <label for="">Password</label>
+	                    <input name="password" type="password" class="form-control" required>
+	                  </div>
+	                </div>
+	                <div class="col-md-6">
+	                  <div class="form-group">
+	                    <label for="">Retype Password</label>
+	                    <input name="retypepassword" type="password" class="form-control" required>
 	                  </div>
 	                </div>
 	                <div class="col-md-6">
 	                  <div class="form-group">
 	                    <label for="">Address</label>
-	                    <input type="text" class="form-control" placeholder="Your Address">
+	                    <input name="address" type="text" class="form-control" value="<?php echo $address === "" ? "" : $address ?>" required>
 	                  </div>
 	                </div>
 	                <div class="col-md-6">
-                    <div class="form-group">
-                      <label for="">Phone</label>
-                      <input type="text" class="form-control" placeholder="Your Phone">
+					  <div class="form-group">
+                        <label for="">Phone</label>
+                        <input name="phone" type="text" pattern="[0-9]+" class="form-control" value="<?php echo $phone === "" ? "" : $phone ?>">
+                      </div>					
                     </div>
-                  </div>
-	                <div class="col-md-12 mt-3">
+	                <div class="col-md-6">
 	                  <div class="form-group">
-	                    <input type="submit" value="Register" class="btn btn-primary py-3 px-5">
+	                    <label for="">Driver License (Volunteer Only)</label>
+	                    <input name="driverlicense" id="driverlicense" type="text" class="form-control" value="<?php echo $driverlicense === "" ? "" : $driverlicense ?>">
 	                  </div>
 	                </div>
-                  <div class="col-md-12 mt-3">
-                    <div class="form-group">
-                      <p><a href="login.php">Already have an account? Login here.</a></p>
-                    </div>
+					<div class="col-md-6">
+	                  <div class="form-group">
+					  </div>					
+                    </div>  
+				  <div class="col-md-12 mt-3">
+	                <div class="form-group">
+					  <span class="error" style="color: red; font-family: Courier"><b><?php echo $msg === "" ? "" : "WARNING: " . $msg;?></b></span>
+					</div>					
                   </div>
+				  <div class="col-md-12 mt-3">
+	                <div class="form-group">
+	                  <input type="submit" value="Register" class="btn btn-primary py-3 px-5"><br>
+					  <p><input type="checkbox" id="gridCheck" required>
+			          <span style="color: red">I agree to the Terms of Use of Kechara Soup Kitchen.</span></p>
+			          <p><a href="login.php">Already have an account? Login here.</a></p>
+	                </div>
+	              </div>
 	              </div>
 	            </form>
 	          </div>
@@ -221,6 +351,16 @@ else {
         </div>
 			</div>
 		</section>
+
+<script type="text/javascript">
+	function CheckRole(val){
+		var element=document.getElementById('driverlicense');
+		if(val=='Volunteer')
+			element.disabled=false;
+		else  
+			element.disabled=true;
+	}
+</script> 
 
     <footer class="ftco-footer ftco-bg-dark ftco-section">
       <div class="container-fluid px-md-5 px-3">
