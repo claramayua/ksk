@@ -63,7 +63,7 @@
 		if ($stmt->num_rows > 0) {
 			while($row = $stmt->fetch_assoc()) {
 				$loginrole = $row["role"];
-				if ($loginrole !== "Staff") {
+				if ($loginrole !== "Staff" && $loginrole != "Volunteer") {
 					session_destroy();
 					header('Location: http://localhost/ksk/login.php');
 				}
@@ -78,14 +78,16 @@
 ?>
 
 <?php
+	
 	//Setting up the value shown in list of users with edit capability
 	//Searching capability and pagination capability
 	$recordno = '';
 	$condition = '';
-	$role = '';
+	$distance = '';
+	$distanceSelect = '';
 	$activeflag = '';
 	$firstflag = '0';
-	$limit = '';
+	$limit = '0,0';
 	
 	//Setting up query statement based on searching keywords
 	if(isset($_REQUEST['fullname']) and $_REQUEST['fullname']!=""){
@@ -94,13 +96,13 @@
 			$firstflag = '1';
 		}
 	}
-	if(isset($_REQUEST['email']) and $_REQUEST['email']!=""){
+	if(isset($_REQUEST['address']) and $_REQUEST['address']!=""){
 		if ($firstflag === '0') {
-			$condition .= ' WHERE email LIKE "%'.$_REQUEST['email'].'%" ';
+			$condition .= ' WHERE address LIKE "%'.$_REQUEST['address'].'%" ';
 			$firstflag = '1';
 		}
 		else {
-			$condition .= ' AND email LIKE "%'.$_REQUEST['email'].'%" ';
+			$condition .= ' AND address LIKE "%'.$_REQUEST['address'].'%" ';
 		}
 	}
 	if(isset($_REQUEST['phone']) and $_REQUEST['phone']!=""){
@@ -112,14 +114,49 @@
 			$condition .= ' AND phone LIKE "%'.$_REQUEST['phone'].'%" ';
 		}
 	}
-	if(isset($_REQUEST['role']) and $_REQUEST['role']!=""){
-		$role = $_REQUEST['role'];
-		if ($firstflag === '0') {
-			$condition .= ' WHERE role = "'.$_REQUEST['role'].'" ';
+	if(isset($_REQUEST['latitude']) and $_REQUEST['latitude']!="" && isset($_REQUEST['longitude']) and $_REQUEST['longitude']!="" && isset($_REQUEST['distance']) and $_REQUEST['distance']!=""){
+		$distance = '(
+						( 
+							3959 * acos(
+								cos	(
+									radians	(
+										'.$_REQUEST['latitude'].'
+									)
+								)
+								* cos (
+									radians (
+										latitude
+									)
+								) 
+								* cos (
+									radians (
+										longitude
+									) 
+									- radians(
+										'.$_REQUEST['longitude'].'
+									)
+								) 
+								+ sin(
+									radians(
+										'.$_REQUEST['latitude'].'
+									)
+								) 
+								* sin(
+									radians(
+										latitude
+									)
+								)
+							)
+						) 
+						* 1.60934
+					)';
+		$distanceSelect = $distance.' AS distance,';
+	    if ($firstflag === '0') {
+			$condition .= ' WHERE '.$distance.' < '.$_REQUEST['distance'].' ';
 			$firstflag = '1';
 		}
 		else {
-			$condition .= ' AND role = "'.$_REQUEST['role'].'" ';
+			$condition .= ' AND '.$distance.' < '.$_REQUEST['distance'].' ';
 		}
 	}
 	if(isset($_REQUEST['activeflag']) and $_REQUEST['activeflag']!=""){
@@ -134,12 +171,11 @@
 	}
 	
 	//Setting up values to be shown in the data list
-	$userid_array = array();
+	$familyid_array = array();
 	$fullname_array = array();
+	$address_array = array();
 	$phone_array = array();
-	$email_array = array();
-	$role_array = array();
-	$driverlicense_array = array();
+	$distance_array = array();
 	$activeflag_array = array();
   
 	$host = "localhost";
@@ -153,60 +189,59 @@
 		die('Connect Error('. mysqli_connect_errno().')'. mysqli_connect_error());
 	}
 	else {
-
-		$SELECT = 'SELECT * FROM user '."$condition".' ORDER BY userid ASC';
+		$SELECT = 'SELECT familyid, fullname, address, phone, latitude, longitude, '.$distanceSelect.' activeflag FROM family '.$condition.' ORDER BY familyid ASC';
 		//prepare statement
 		$stmt = $conn->query($SELECT);
 		$recordno = $stmt->num_rows;
 		
-		//Save html code in string to be used in provide pagination capability
-		//This is done because the numbering, the page link in pagination is complicated
-		//The Paginator object defined in the paginator class is implemented here
-		$pagingcode = '';
-		$pages = new Paginator($recordno,9);
-		$pagingcode .= '<hr>';
-		$pagingcode .= '<div>';
-		$pagingcode .= '<div class="col-sm-12">';
-		$pagingcode .= '<div class="row">';
-		$pagingcode .= '<div class="col-sm-8">';
-		$pagingcode .= '<nav aria-label="Page navigation">';
-		$pagingcode .= '<ul class="pagination">';
-		$pagingcode .= $pages->display_pages();
-		$pagingcode .= '</ul>';
-		$pagingcode .= '</nav>';
-		$pagingcode .= '</div>';
-		$pagingcode .= '<div class="col-sm-3.5 text-right">';
-		$pagingcode .= '<span class="form-inline">';
-		$pagingcode .= $pages->display_jump_menu() . $pages->display_items_per_page();
-		$pagingcode .= '</span>';
-		$pagingcode .= '</div>';
-		$pagingcode .= '<div class="clearfix"></div>';
-		$limit = $pages->limit_start.', '.$pages->limit_end;		
-		$pagingcode .= '</div>';
-		$pagingcode .= '</div>';
-		$pagingcode .= '</div>';
-		$pagingcode .= '<hr>';
+		if ($recordno > 0) {
+			//Save html code in string to be used in provide pagination capability
+			//This is done because the numbering, the page link in pagination is complicated
+			//The Paginator object defined in the paginator class is implemented here
+			$pagingcode = '';
+			$pages = new Paginator($recordno,9);
+			$pagingcode .= '<hr>';
+			$pagingcode .= '<div>';
+			$pagingcode .= '<div class="col-sm-12">';
+			$pagingcode .= '<div class="row">';
+			$pagingcode .= '<div class="col-sm-8">';
+			$pagingcode .= '<nav aria-label="Page navigation">';
+			$pagingcode .= '<ul class="pagination">';
+			$pagingcode .= $pages->display_pages();
+			$pagingcode .= '</ul>';
+			$pagingcode .= '</nav>';
+			$pagingcode .= '</div>';
+			$pagingcode .= '<div class="col-sm-3.5 text-right">';
+			$pagingcode .= '<span class="form-inline">';
+			$pagingcode .= $pages->display_jump_menu() . $pages->display_items_per_page();
+			$pagingcode .= '</span>';
+			$pagingcode .= '</div>';
+			$pagingcode .= '<div class="clearfix"></div>';
+			$limit = $pages->limit_start.', '.$pages->limit_end;		
+			$pagingcode .= '</div>';
+			$pagingcode .= '</div>';
+			$pagingcode .= '</div>';
+			$pagingcode .= '<hr>';
+		}
 		
-		$SELECT = 'SELECT * FROM user '."$condition".' ORDER BY userid ASC LIMIT '."$limit".'';
+		$SELECT = 'SELECT familyid, fullname, address, phone, latitude, longitude, '.$distanceSelect.' activeflag FROM family '.$condition.' ORDER BY familyid ASC LIMIT '.$limit.'';
+		
 		//prepare statement
 		$stmt = $conn->query($SELECT);
 		$recordno = $stmt->num_rows;
 		if ($recordno > 0)
 			while ($row = $stmt->fetch_assoc()) {
-				array_push($userid_array, $row["userid"]);
+				array_push($familyid_array, $row["familyid"]);
 				array_push($fullname_array, $row["fullname"]);
+				array_push($address_array, $row["address"]);
 				array_push($phone_array, $row["phone"]);
-				array_push($email_array, $row["email"]);
-				array_push($role_array, $row["role"]);
-				if (!empty($row["driverlicense"]))
-					array_push($driverlicense_array, $row["driverlicense"]);
-				else
-					array_push($driverlicense_array, "");
+				array_push($distance_array, $row["distance"]);
 				array_push($activeflag_array, $row["activeflag"]);
 			}
 		$stmt->close();
 	}
 	$conn->close();
+	
 ?>
     
     <div class="py-1 bg-black top">
@@ -257,10 +292,10 @@
       <div class="container">
         <div class="row no-gutters slider-text align-items-end justify-content-center">
           <div class="col-md-9 ftco-animate text-center">
-            <h1 class="mb-2 bread">Manage User</h1>
+            <h1 class="mb-2 bread">Manage Family</h1>
             <p class="breadcrumbs">
 			  <span class="mr-2"><a href="menu<?php echo strtolower($loginrole); ?>.php"><?php echo $loginrole; ?> Menu<i class="ion-ios-arrow-forward"></i></a></span> 
-			  <span>Manage User<i class="ion-ios-arrow-forward"></i></span></p>
+			  <span>Manage Family<i class="ion-ios-arrow-forward"></i></span></p>
           </div>
         </div>
       </div>
@@ -272,7 +307,7 @@
 
    	<div class="container">
 		<div class="card">
-			<div class="card-header"><i class="fa fa-fw fa-globe"></i> <strong>Browse User</strong> </div>
+			<div class="card-header"><i class="fa fa-fw fa-globe"></i> <strong>Browse Family</strong> <a href="addfamily.php" class="float-right btn btn-dark btn-sm"><i class="fa fa-fw fa-plus-circle"></i>Add Family</a></div>
 			<div class="card-body">
 				<?php
 				if(isset($_REQUEST['msg']) and $_REQUEST['msg']=="rds"){
@@ -286,7 +321,7 @@
 				}
 				?>
 				<div class="col-sm-12">
-					<h5 class="card-title"><i class="fa fa-fw fa-search"></i>Find User</h5>
+					<h5 class="card-title"><i class="fa fa-fw fa-search"></i>Find Family</h5>
 					<form method="get">
 						<div class="row">
 							<div class="col-sm-3">
@@ -295,10 +330,10 @@
 									<input type="text" name="fullname" id="fullname" class="form-control" value="<?php echo isset($_REQUEST['fullname'])?$_REQUEST['fullname']:''?>">
 								</div>
 							</div>
-							<div class="col-sm-3">
+							<div class="col-sm-5">
 								<div class="form-group">
-									<label>Email</label>
-									<input type="text" name="email" id="email" class="form-control" value="<?php echo isset($_REQUEST['email'])?$_REQUEST['email']:''?>">
+									<label>Address</label>
+									<input type="text" name="address" id="address" class="form-control" value="<?php echo isset($_REQUEST['address'])?$_REQUEST['address']:''?>">
 								</div>
 							</div>
 							<div class="col-sm-2">
@@ -309,18 +344,6 @@
 							</div>
 							<div class="col-sm-2">
 								<div class="form-group">
-								  <label for="">Role</label>
-								  <div class="select-wrap one-third">									
-									  <select name="role" id="role" class="form-control">
-										<option value=""></option>
-										<option <?php echo $role === "Donor" ? "selected" : "" ?> value="Donor">Donor</option>
-										<option <?php echo $role === "Volunteer" ? "selected" : "" ?> value="Volunteer">Volunteer</option>
-									  </select>
-									</div>
-								  </div>
-								</div>
-								<div class="col-sm-2">
-								<div class="form-group">
 								  <label for="">Status</label>
 								  <div class="select-wrap one-third">
 									  <select name="activeflag" id="activeflag" class="form-control">
@@ -330,7 +353,25 @@
 									  </select>
 									</div>
 								  </div>
-								</div>							
+								</div>
+							<div class="col-sm-2">
+								<div class="form-group">
+								  <label for="">Distance (in km)</label>
+								  <input type="text" pattern="^[0-9\.]*$" name="distance" id="distance" class="form-control" value="<?php echo isset($_REQUEST['distance'])?$_REQUEST['distance']:''?>">
+								  </div>
+								</div>
+							<div class="col-sm-2">
+								<div class="form-group">
+									<label>From Latitude</label>
+									<input type="text" pattern="^[0-9\.\-]*$" name="latitude" id="latitude" class="form-control" value="<?php echo isset($_REQUEST['latitude'])?$_REQUEST['latitude']:''?>">
+								</div>
+							</div>
+							<div class="col-sm-2">
+								<div class="form-group">
+									<label>Longitude</label>
+									<input type="text" pattern="^[0-9\.\-]*$" name="longitude" id="longitude" class="form-control" value="<?php echo isset($_REQUEST['longitude'])?$_REQUEST['longitude']:''?>">
+								</div>
+							</div>								
 							<div class="col-sm-4">
 								<div class="form-group">
 									<label>&nbsp;</label>
@@ -348,7 +389,8 @@
 
 <?php
 	//Including the pagination code here
-	echo $pagingcode;
+	if ($recordno > 0)
+		echo $pagingcode;
 ?>
 
 		<div>
@@ -357,10 +399,9 @@
 					<tr class="bg-primary text-white">
 						<th class="text-center">No</th>
 						<th class="text-center">Full Name</th>
-						<th class="text-center">Email</th>
+						<th class="text-center">Address</th>
 						<th class="text-center">Phone</th>
-						<th class="text-center">Role</th>
-						<th class="text-center">Driver License</th>
+						<th class="text-center">Distance</th>
 						<th class="text-center">Status</th>
 						<th class="text-center">Action</th>
 					</tr>
@@ -373,18 +414,18 @@
 					<tr>
 						<td><?php echo $i + 1;?></td>
 						<td><?php echo $fullname_array[$i];?></td>
-						<td><?php echo $email_array[$i];?></td>
+						<td><?php echo $address_array[$i];?></td>
 						<td><?php echo $phone_array[$i];?></td>
-						<td><?php echo $role_array[$i];?></td>
-						<td><?php echo $driverlicense_array[$i] === "" ? "" : $driverlicense_array[$i];?></td>
+						<td><?php echo $distance_array[$i];?></td>
 						<td><?php echo $activeflag_array[$i] === '1' ? "Active" : "Not Active";?></td>
 						<td align="center">
-							<a href="edituser.php?editId=<?php echo $userid_array[$i];?>" class="text-primary"><i class="fa fa-fw fa-edit"></i> Edit</a>
+							<a href="editfamily.php?editId=<?php echo $familyid_array[$i];?>" class="text-primary"><i class="fa fa-fw fa-edit"></i> Edit</a>
 <?php
 			//Delete button is for user 'Admin' only
 			if ($loginrole == "Admin")
 							echo '<a href="delete.php?delId='.$userid_array[$i].'" class="text-danger" onClick="return confirm(\'Are you sure to delete this user?\');"><i class="fa fa-fw fa-trash"></i> Delete</a>';
-?>						</td>
+?>
+						</td>
 
 					</tr>
 					

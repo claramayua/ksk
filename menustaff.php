@@ -43,8 +43,9 @@
 	//Check login session whether it is an applicant or officer
 	//this to make sure page is accessed manually using its url
 	$loginfullname = "";
+	$userid = '';
 	if(isset($_SESSION["loginUserID"])) {
-		$loginUserID = $_SESSION["loginUserID"];
+		$userid = $_SESSION["loginUserID"];
 		$host = "localhost";
 		$dbUsername = "root";
 		$dbPassword = "";
@@ -56,7 +57,7 @@
 			die('Connect Error('. mysqli_connect_errno().')'. mysqli_connect_error());
 		}
 		else {
-			$SELECT = "SELECT role From user Where userid = '".$loginUserID."' Limit 1";
+			$SELECT = "SELECT role From user Where userid = '".$userid."' Limit 1";
 			$stmt = $conn->query($SELECT);
 			if ($stmt->num_rows > 0) {
 				while($row = $stmt->fetch_assoc()) {
@@ -126,11 +127,11 @@
 
 	      <div class="collapse navbar-collapse" id="ftco-nav">
 	        <ul class="navbar-nav ml-auto">
-			  <li class="nav-item active"><a href="profile.php" class="nav-link">Profile</a></li>
+			  <li class="nav-item active"><a href="showprofile.php" class="nav-link">Profile</a></li>
               <li class="nav-item active"><a href="setting.php" class="nav-link">Setting</a></li>
 			  <li class="nav-item active"><a href="changepassword.php" class="nav-link">Change Password</a></li>
 			  <li class="nav-item active"><a href="logout.php" class="nav-link">Logout</a></li>
-			  <li class="nav-item cta"><a href="menuvolunteer.php" class="nav-link">Staff Menu</a></li>
+			  <li class="nav-item cta"><a href="menustaff.php" class="nav-link">Staff Menu</a></li>
             </ul>
 	      </div>
 	    </div>
@@ -146,12 +147,12 @@
             <div class="col-md-12 col-sm-12 text-center ftco-animate">
               <h1 class="mb-4 mt-5">Food Distribution</h1>
               <a href="manageuser.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">User</a>
-			  <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Product</a>
-			  <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Family</a>
-			  <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Inventory</a>
-			  <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Delivery</a>
-			  <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Report Setting</a>
-			  <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Report</a>
+			  <a href="underconstruction.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Product</a>
+			  <a href="managefamily.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Family</a>
+			  <a href="underconstruction.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Inventory</a>
+			  <a href="underconstruction.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Delivery</a>
+			  <a href="underconstruction.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Report Setting</a>
+			  <a href="underconstruction.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Report</a>
             </div>
 
           </div>
@@ -165,13 +166,13 @@
 
             <div class="col-md-12 col-sm-12 text-center ftco-animate">
               <h1 class="mb-4 mt-5">Soup Kitchen Building</h1>
-              <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">User</a>
-			  <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Product</a>
-			  <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Family</a>
-			  <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Inventory</a>
-			  <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Delivery</a>
-			  <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Report Setting</a>
-			  <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Report</a>
+              <a href="manageuser.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">User</a>
+			  <a href="underconstruction.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Product</a>
+			  <a href="managefamily.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Family</a>
+			  <a href="underconstruction.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Inventory</a>
+			  <a href="underconstruction.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Delivery</a>
+			  <a href="underconstruction.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Report Setting</a>
+			  <a href="underconstruction.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Report</a>
             </div>
 
           </div>
@@ -185,13 +186,13 @@
 
             <div class="col-md-12 col-sm-12 text-center ftco-animate">
               <h1 class="mb-4 mt-5">Food Bank</h1>
-              <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">User</a>
-			  <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Product</a>
-			  <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Family</a>
-			  <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Inventory</a>
-			  <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Delivery</a>
-			  <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Report Setting</a>
-			  <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Report</a>
+              <a href="manageuser.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">User</a>
+			  <a href="underconstruction.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Product</a>
+			  <a href="managefamily.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Family</a>
+			  <a href="underconstruction.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Inventory</a>
+			  <a href="underconstruction.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Delivery</a>
+			  <a href="underconstruction.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Report Setting</a>
+			  <a href="underconstruction.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Report</a>
             </div>
 
           </div>

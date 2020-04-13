@@ -40,7 +40,7 @@
   <body>
 
 <?php
-	//Check login session whether it is an applicant or officer
+	//Check login session whether it is a valid user or not
 	//this to make sure page is accessed manually using its url
 	$loginfullname = "";
 	if(isset($_SESSION["loginUserID"])) {
@@ -126,11 +126,11 @@
 
 	      <div class="collapse navbar-collapse" id="ftco-nav">
 	        <ul class="navbar-nav ml-auto">
-			  <li class="nav-item active"><a href="profile.php" class="nav-link">Profile</a></li>
+			  <li class="nav-item active"><a href="showprofile.php" class="nav-link">Profile</a></li>
               <li class="nav-item active"><a href="setting.php" class="nav-link">Setting</a></li>
 			  <li class="nav-item active"><a href="changepassword.php" class="nav-link">Change Password</a></li>
 			  <li class="nav-item active"><a href="logout.php" class="nav-link">Logout</a></li>
-			  <li class="nav-item cta"><a href="menuvolunteer.php" class="nav-link">Donor Menu</a></li>
+			  <li class="nav-item cta"><a href="menudonor.php" class="nav-link">Donor Menu</a></li>
             </ul>
 	      </div>
 	    </div>
@@ -145,8 +145,8 @@
 
             <div class="col-md-12 col-sm-12 text-center ftco-animate">
               <h1 class="mb-4 mt-5">Food Distribution</h1>
-              <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Inventory Report</a>
-			  <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Donor Certificate</a>
+              <a href="underconstruction.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Inventory Report</a>
+			  <a href="underconstruction.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Donor Certificate</a>
             </div>
 
           </div>
@@ -160,8 +160,8 @@
 
             <div class="col-md-12 col-sm-12 text-center ftco-animate">
               <h1 class="mb-4 mt-5">Soup Kitchen Building</h1>
-              <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Inventory Report</a>
-			  <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Donor Certificate</a>
+              <a href="underconstruction.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Inventory Report</a>
+			  <a href="underconstruction.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Donor Certificate</a>
             </div>
 
           </div>

@@ -126,7 +126,7 @@
 
 	      <div class="collapse navbar-collapse" id="ftco-nav">
 	        <ul class="navbar-nav ml-auto">
-			  <li class="nav-item active"><a href="profile.php" class="nav-link">Profile</a></li>
+			  <li class="nav-item active"><a href="showprofile.php" class="nav-link">Profile</a></li>
               <li class="nav-item active"><a href="setting.php" class="nav-link">Setting</a></li>
 			  <li class="nav-item active"><a href="changepassword.php" class="nav-link">Change Password</a></li>
 			  <li class="nav-item active"><a href="logout.php" class="nav-link">Logout</a></li>
@@ -145,12 +145,12 @@
 
             <div class="col-md-12 col-sm-12 text-center ftco-animate">
               <h1 class="mb-4 mt-5">Food Distribution</h1>
-              <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Schedule</a>
-			  <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Family</a>
-			  <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Inventory</a>
-			  <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Delivery</a>
-			  <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Attendance</a>
-			  <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Certificate</a>
+              <a href="underconstruction.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Schedule</a>
+			  <a href="managefamily.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Family</a>
+			  <a href="underconstruction.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Inventory</a>
+			  <a href="underconstruction.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Delivery</a>
+			  <a href="underconstruction.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Attendance</a>
+			  <a href="underconstruction.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Certificate</a>
             </div>
 
           </div>
@@ -164,12 +164,12 @@
 
             <div class="col-md-12 col-sm-12 text-center ftco-animate">
               <h1 class="mb-4 mt-5">Soup Kitchen Building</h1>
-              <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Schedule</a>
-			  <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Family</a>
-			  <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Inventory</a>
-			  <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Delivery</a>
-			  <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Attendance</a>
-			  <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Certificate</a>
+              <a href="underconstruction.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Schedule</a>
+			  <a href="managefamily.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Family</a>
+			  <a href="underconstruction.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Inventory</a>
+			  <a href="underconstruction.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Delivery</a>
+			  <a href="underconstruction.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Attendance</a>
+			  <a href="underconstruction.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Certificate</a>
             </div>
 
           </div>
@@ -183,12 +183,12 @@
 
             <div class="col-md-12 col-sm-12 text-center ftco-animate">
               <h1 class="mb-4 mt-5">Food Bank</h1>
-              <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Schedule</a>
-			  <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Family</a>
-			  <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Inventory</a>
-			  <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Delivery</a>
-			  <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Attendance</a>
-			  <a href="#about" class="btn btn-primary p-3 px-xl-4 py-xl-3">Certificate</a>
+              <a href="underconstruction.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Schedule</a>
+			  <a href="managefamily.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Family</a>
+			  <a href="underconstruction.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Inventory</a>
+			  <a href="underconstruction.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Delivery</a>
+			  <a href="underconstruction.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Attendance</a>
+			  <a href="underconstruction.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Certificate</a>
             </div>
 
           </div>

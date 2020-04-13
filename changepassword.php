@@ -44,7 +44,7 @@
 ?>
 
 <?php
-	//Check login session whether it is an applicant or officer
+	//Check login session whether it is a valid user or not
 	//this to make sure page is accessed manually using its url
 	$loginfullname = "";
 	if(isset($_SESSION["loginUserID"])) {
@@ -171,8 +171,9 @@
 
 	      <div class="collapse navbar-collapse" id="ftco-nav">
 	        <ul class="navbar-nav ml-auto">
-			<li class="nav-item active"><a href="profile.php" class="nav-link">Profile</a></li>
+			<li class="nav-item active"><a href="showprofile.php" class="nav-link">Profile</a></li>
             <li class="nav-item active"><a href="setting.php" class="nav-link">Setting</a></li>
+			<li class="nav-item active"><a href="changepassword.php" class="nav-link">Change Password</a></li>
 			<li class="nav-item active"><a href="logout.php" class="nav-link">Logout</a></li>
 	        <?php
 	          echo '<li class="nav-item cta"><a href="menu' . strtolower($role) . '.php" class="nav-link">' . $role . ' Menu</a></li>'
@@ -189,7 +190,7 @@
         <div class="row no-gutters slider-text align-items-end justify-content-center">
           <div class="col-md-9 ftco-animate text-center">
             <h1 class="mb-2 bread">Change Password</h1>
-            <p class="breadcrumbs"><span class="mr-2"><a href="index.php">Home <i class="ion-ios-arrow-forward"></i></a></span> <span>Change Password<i class="ion-ios-arrow-forward"></i></span></p>
+            <p class="breadcrumbs"><span class="mr-2"><a href="menu<?php echo strtolower($role); ?>.php"><?php echo $role; ?> Menu <i class="ion-ios-arrow-forward"></i></a></span> <span>Change Password<i class="ion-ios-arrow-forward"></i></span></p>
           </div>
         </div>
       </div>

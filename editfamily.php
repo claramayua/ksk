@@ -40,14 +40,17 @@
   <body>
 
 <?php
-	$msg = '';
-	$userid = '';
-	$role = '';
-	$fullname = '';
-	$address = '';
-	$phone = '';
-	$driverlicense = '';
-	$activeflag = '';
+	$msg = "";
+	$fullname = "";
+	$address = "";
+	$phone = "";
+	$email = "";
+	$latitude = "";
+	$longitude = "";
+	$babynumber = "0";
+	$childrennumber = "0";
+	$adultnumber = "0";
+	$elderlynumber = "0";
 ?>
 
 <?php
@@ -73,7 +76,7 @@
 		if ($stmt->num_rows > 0) {
 			while($row = $stmt->fetch_assoc()) {
 				$loginrole = $row["role"];
-				if ($loginrole !== "Staff") {
+				if ($loginrole !== "Staff" && $loginrole !== "Volunteer") {
 					session_destroy();
 					header('Location: http://localhost/ksk/login.php');
 				}
@@ -90,7 +93,7 @@
 <?php
 	//Getting variabel values to be shown for editing purpose
 	if(isset($_REQUEST['editId']) and $_REQUEST['editId']!=""){
-		$userid = $_REQUEST['editId'];
+		$familyid = $_REQUEST['editId'];
 		$host = "localhost";
 		$dbUsername = "root";
 		$dbPassword = "";
@@ -102,15 +105,15 @@
 			die('Connect Error('. mysqli_connect_errno().')'. mysqli_connect_error());
 		}
 		else {
-			$SELECT = "SELECT role, fullname, address, phone, driverlicense, activeflag From user Where userid = ? Limit 1";
+			$SELECT = "SELECT fullname, address, phone, email, latitude, longitude, babynumber, childrennumber, adultnumber, elderlynumber, activeflag From family Where familyid = ? Limit 1";
 			//prepare statement
 			$stmt = $conn->prepare($SELECT);
-			$stmt->bind_param("i", $userid);
+			$stmt->bind_param("i", $familyid);
 			$stmt->execute();
 			$stmt->store_result();
 			$rnum = $stmt->num_rows;
 			if ($rnum > 0) {
-				$stmt->bind_result($role, $fullname, $address, $phone, $driverlicense, $activeflag);
+				$stmt->bind_result($fullname, $address, $phone, $email, $latitude, $longitude, $babynumber, $childrennumber, $adultnumber, $elderlynumber, $activeflag);
 				$stmt->fetch();
 			}
 			$stmt->close();
@@ -122,36 +125,45 @@
 	//Get the data from the input form
 	//Save into the database
 	if ($_SERVER["REQUEST_METHOD"] == "POST") {	
-		echo $userid;
-		$userid = $_POST['userid'];
+		$familyid = $_POST['familyid'];
 		$fullname = $_POST['fullname'];
-		$role = $_POST['role'];
 		$address = $_POST['address'];
 		$phone = $_POST['phone'];
-		$driverlicense = $_POST['driverlicense'];
+		$email = $_POST['email'];
+		$latitude = $_POST['latitude'];
+		$longitude = $_POST['longitude'];
+		$babynumber = $_POST['babynumber'];
+		$chlidrennumber = $_POST['childrennumber'];
+		$adultnumber = $_POST['adultnumber'];
+		$elderlynumber = $_POST['elderlynumber'];
 		$activeflag = $_POST['activeflag'];
 		
-		$host = "localhost";
-		$dbUsername = "root";
-		$dbPassword = "";
-		$dbname = "ksk";
-		//create connection	
-		$conn = new mysqli($host, $dbUsername, $dbPassword, $dbname);
-		if (mysqli_connect_error()) {
-			$msg = "Connection Error!";
-			die('Connect Error('. mysqli_connect_errno().')'. mysqli_connect_error());
+		if ($babynumber + $childrennumber + $adultnumber + $elderlynumber == 0) {
+			$msg = "The number of people in the family cannot be 0.";
 		}
 		else {
-			$UPDATE = "UPDATE user SET role=?, fullname=?, address=?, phone=?, driverlicense=?, activeflag=? Where userid=?";
-			echo $UPDATE;
-			//prepare statement
-			$stmt = $conn->prepare($UPDATE);
-			$stmt->bind_param("sssssii", $role, $fullname, $address, $phone, $driverlicense, $activeflag, $userid);
-			$stmt->execute();
-			$stmt->close();
-			header('Location: http://localhost/ksk/manageuser.php');
+			$host = "localhost";
+			$dbUsername = "root";
+			$dbPassword = "";
+			$dbname = "ksk";
+			//create connection	
+			$conn = new mysqli($host, $dbUsername, $dbPassword, $dbname);
+			if (mysqli_connect_error()) {
+				$msg = "Connection Error!";
+				die('Connect Error('. mysqli_connect_errno().')'. mysqli_connect_error());
+			}
+			else {
+				$UPDATE = "UPDATE family SET fullname=?, address=?, phone=?, email=?, latitude=?, longitude=?, babynumber=?, childrennumber=?, adultnumber=?, elderlynumber=?, activeflag=? Where familyid=?";
+				echo $UPDATE;
+				//prepare statement
+				$stmt = $conn->prepare($UPDATE);
+				$stmt->bind_param("ssssddiiiiii", $fullname, $address, $phone, $email, $latitude, $longitude, $babynumber, $childrennumber, $adultnumber, $elderlynumber, $activeflag, $familyid);
+				$stmt->execute();
+				$stmt->close();
+				header('Location: http://localhost/ksk/managefamily.php');
+			}
+			$conn->close();
 		}
-		$conn->close();
 	}
 ?>
 
@@ -203,10 +215,10 @@
       <div class="container">
         <div class="row no-gutters slider-text align-items-end justify-content-center">
           <div class="col-md-9 ftco-animate text-center">
-            <h1 class="mb-2 bread">Edit User</h1>
+            <h1 class="mb-2 bread">Edit Family</h1>
             <p class="breadcrumbs">
 			  <span class="mr-2"><a href="menu<?php echo strtolower($loginrole); ?>.php"><?php echo $loginrole; ?> Menu <i class="ion-ios-arrow-forward"></i></a></span> 
-			  <span>Edit User <i class="ion-ios-arrow-forward"></i></span>
+			  <span>Edit Family <i class="ion-ios-arrow-forward"></i></span>
 			</p>
           </div>
         </div>
@@ -224,19 +236,6 @@
 						</div>
 						<form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="POST" class="was-validated">
 						  <div class="row">
-							  <div class="col-md-12 mt-3">
-								<div class="form-group">
-								  <label for="">Role</label>
-								  <div class="select-wrap one-third">
-									<div class="icon"><span class="ion-ios-arrow-down"></span></div>
-									<select name="role" id="role" class="form-control" onchange='CheckRole(this.value);' required>
-										<option <?php echo $role === "Donor" ? "selected" : "" ?> value="Donor">Donor</option>
-										<option <?php echo $role === "Volunteer" ? "selected" : "" ?> value="Volunteer">Volunteer</option>
-										<option <?php echo $role === "Staff" ? "selected" : "" ?> value="Staff">Staff</option>
-									</select>
-								  </div>
-								</div>
-                              </div>
 							  <div class="col-md-6">
 								  <div class="form-group">
 									<label for="">Full Name</label>
@@ -256,11 +255,47 @@
 								  </div>					
 							  </div>
 							  <div class="col-md-6">
-								  <div class="form-group">
-									<label for="">Driver License (Volunteer Only)</label>
-									<input name="driverlicense" id="driverlicense" type="text" class="form-control" value="<?php echo $driverlicense === "" ? "" : $driverlicense ?>">
-								  </div>
+							  <div class="form-group">
+								<label for="">Email</label>
+								<input name="email" type="email" class="form-control" value="<?php echo $email === "" ? "" : $email ?>">
 							  </div>
+							</div>
+							<div class="col-md-6">
+							  <div class="form-group">
+								<label for="">Latitude</label>
+								<input name="latitude" type="text" pattern="^[0-9\.\-]*$" class="form-control" value="<?php echo $latitude === "" ? "" : $latitude ?>" required>
+							  </div>					
+							</div>
+							<div class="col-md-6">
+							  <div class="form-group">
+								<label for="">Longitude</label>
+								<input name="longitude" type="text" pattern="^[0-9\.\-]*$" class="form-control" value="<?php echo $longitude === "" ? "" : $longitude ?>" required>
+							  </div>					
+							</div>
+							<div class="col-md-6">
+							  <div class="form-group">
+								<label for="">Number of Babies</label>
+								<input name="babynumber" type="text" pattern="[0-9]" class="form-control" value="<?php echo $babynumber === "" ? "0" : $babynumber ?>" required>
+							  </div>					
+							</div>
+							<div class="col-md-6">
+							  <div class="form-group">
+								<label for="">Number of Children</label>
+								<input name="childrennumber" type="text" pattern="[0-9]" class="form-control" value="<?php echo $childrennumber === "" ? "0" : $childrennumber ?>" required>
+							  </div>					
+							</div>
+							<div class="col-md-6">
+							  <div class="form-group">
+								<label for="">Number of Adults</label>
+								<input name="adultnumber" type="text" pattern="[0-9]" class="form-control" value="<?php echo $adultnumber === "" ? "0" : $adultnumber ?>" required>
+							  </div>					
+							</div>
+							<div class="col-md-6">
+							  <div class="form-group">
+								<label for="">Number of Elderly</label>
+								<input name="elderlynumber" type="text" pattern="[0-9]" class="form-control" value="<?php echo $elderlynumber === "" ? "0" : $elderlynumber ?>" required>
+							  </div>					
+							</div>
 							  <div class="col-md-6">
 									<div class="form-group">
 										<label for="">Status</label>
@@ -284,9 +319,9 @@
 							  </div>
 							  <div class="col-md-12 mt-3">
 								  <div class="form-group">
-								    <input type="hidden" id="userid" name="userid" value="<?php echo $userid === "" ? "" : $userid ?>">
+								    <input type="hidden" id="familyid" name="familyid" value="<?php echo $familyid === "" ? "" : $familyid ?>">
 								    <input type="submit" value="Edit" class="btn btn-primary py-3 px-5">
-								    <input class="btn btn-primary py-3 px-4" type="submit" onclick="window.location.replace('manageuser.php')" value="Cancel">
+								    <input class="btn btn-primary py-3 px-4" type="submit" onclick="window.location.replace('managefamily.php')" value="Cancel">
 								  </div>
 							  </div>
 						  </div>
@@ -299,21 +334,6 @@
 				</div>
 			</div>
 		</section>
-
-<script type="text/javascript">
-	//Setting driverlicense disability and value when the value of role is changed
-	function CheckRole(val){
-		var element=document.getElementById('driverlicense');
-		if(val=='Volunteer') {
-			element.disabled=false;
-			element.value = "<?php echo $driverlicense; ?>";
-		}
-		else {
-			element.disabled=true;
-			element.value = "";
-		}
-	}
-</script> 
 
     <footer class="ftco-footer ftco-bg-dark ftco-section">
       <div class="container-fluid px-md-5 px-3">
@@ -398,5 +418,3 @@
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVWaKrjvy3MaE7SQ74_uJiULgl1JY0H2s&sensor=false"></script>
   <script src="js/google-map.js"></script>
   <script src="js/main.js"></script>
-    
-  </body>
